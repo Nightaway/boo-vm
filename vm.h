@@ -1,15 +1,21 @@
 #ifndef __BOO_VM_H__
 #define __BOO_VM_H__
 
+#include <string>
+
 namespace boovm {
 
     enum {
         OP_HALT = 0,
         OP_LOADC,
-        OP_ADD
+        OP_ADD,
+        OP_CALLC
     };
 
-    typedef int Value;
+    struct Value {
+            const char *str;
+            int iv;
+    };
 
     struct Bytecode_ {
         char op;
@@ -27,7 +33,7 @@ namespace boovm {
             }
 
             Bytecode_ operator[](int idx) {
-                return bytecode_[idx_];
+                return bytecode_[idx];
             }
 
         private:
@@ -49,7 +55,7 @@ namespace boovm {
             }
             
             Value operator[](int idx) {
-                return s_[idx_];
+                return s_[idx];
             }
 
         private:
@@ -70,7 +76,7 @@ namespace boovm {
             Bytecode bytecode_;
             Stack stack_;
             unsigned *SP_;
-            unsigned *PC_;
+            unsigned PC_;
 
             void execute(Bytecode_ code);
     };
