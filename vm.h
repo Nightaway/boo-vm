@@ -1,8 +1,6 @@
 #ifndef __BOO_VM_H__
 #define __BOO_VM_H__
 
-#include <string>
-
 namespace boovm {
 
     enum {
@@ -17,7 +15,7 @@ namespace boovm {
             int iv;
     };
 
-    struct Bytecode_ {
+    struct Instruction {
         char op;
         Value oprand;
     };
@@ -27,17 +25,17 @@ namespace boovm {
             Bytecode();
             ~Bytecode();
 
-            void Push(Bytecode_ code);
+            void Push(Instruction code);
             unsigned *GetPC() {
                 return &idx_;
             }
 
-            Bytecode_ operator[](int idx) {
-                return bytecode_[idx];
+            Instruction operator[](int idx) {
+                return inst_[idx];
             }
 
         private:
-            Bytecode_ *bytecode_;
+            Instruction *inst_;
             unsigned len_;
             unsigned idx_;
     };
@@ -78,7 +76,7 @@ namespace boovm {
             unsigned *SP_;
             unsigned PC_;
 
-            void execute(Bytecode_ code);
+            void execute(Instruction inst);
     };
 
 };

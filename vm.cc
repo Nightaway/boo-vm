@@ -2,19 +2,22 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#include <string>
 
 using namespace boovm;
 
-Bytecode::Bytecode() : bytecode_{nullptr}, len_{1000}, idx_{0}
+Bytecode::Bytecode() : inst_{nullptr}, len_{1000}, idx_{0}
 {
-    bytecode_ = new Bytecode_[len_];
+    inst_ = new Instruction[len_];
 }
 Bytecode::~Bytecode() {
-    delete [] bytecode_;
+    delete [] inst_;
 }
 
-void Bytecode::Push(Bytecode_ code) {
-    bytecode_[idx_++] = code;
+void Bytecode::Push(Instruction inst) {
+    inst_[idx_++] = inst;
 }
 
 Stack::Stack() : s_{nullptr}, len_{10}, idx_{0} {
@@ -43,8 +46,7 @@ void VM::Compile(const char *asm_code, unsigned len) {
     std::string op;
     for (unsigned i=0; i<len; ++i) {
         op += asm_code[i];
-        //printf("%s", op.c_str());
-        //fflush(0);
+
         if (op == "loadc") {
             i += 2;
 
@@ -54,26 +56,25 @@ void VM::Compile(const char *asm_code, unsigned len) {
             }
             Value oprand{nullptr, 0};
             oprand.iv = atoi(str_oprand.c_str());
-            Bytecode_ c{OP_LOADC, oprand};
-            bytecode_.Push(c);
+            Instruction inst{OP_LOADC, oprand};
+            bytecode_.Push(inst);
             op = "";
         } else if (op == "add") {
             Value oprand{nullptr, 0};
-            Bytecode_ c{OP_ADD, oprand};
-            bytecode_.Push(c);
+            Instruction inst{OP_ADD, oprand};
+            bytecode_.Push(inst);
             op = "";
-        } else if (op == "callc") {
+        } else if (op == "call") {
             i += 2;
 
             std::string str_oprand;
             while (asm_code[i] != '\n'&&i<len) {
                 str_oprand += asm_code[i++];
             }
-            fflush(0);
             if (str_oprand == "print") {
                 Value oprand{"print", 0};
-                Bytecode_ c{OP_CALLC, oprand};
-                bytecode_.Push(c);
+                Instruction inst{OP_CALLC, oprand};
+                bytecode_.Push(inst);
             }
             op = "";
         } else if (op == "\n") {
@@ -81,31 +82,28 @@ void VM::Compile(const char *asm_code, unsigned len) {
         }
     }
 
-     Bytecode_ c{OP_HALT, 0};
-     bytecode_.Push(c);
+     Instruction inst{OP_HALT, 0};
+     bytecode_.Push(inst);
 }
 void VM::Run() {
     for (;;) {
-        Bytecode_ code = bytecode_[PC_++];
-        execute(code);
+        Instruction inst = bytecode_[PC_++];
+        execute(inst);
     }
 }
 
-void VM::execute(Bytecode_ code) {
+void VM::execute(Instruction inst) {
     Value oprand1{nullptr, 0};
     Value oprand2{nullptr, 0};
     Value result{nullptr, 0};
-    //printf("\n%d\n", code.op);
-    //fflush(0);
-    switch (code.op) {
+
+    switch (inst.op) {
         case OP_LOADC:
-        stack_.Push(code.oprand);
+        stack_.Push(inst.oprand);
         break;
 
         case OP_ADD:
         oprand1 = stack_[(*SP_)-1];
-        //printf("%d %d", *SP_, oprand1.iv);
-        //fflush(0);
         oprand2 = stack_[(*SP_)-2];
         result.iv = oprand1.iv + oprand2.iv;
         stack_.Push(result);
@@ -113,7 +111,7 @@ void VM::execute(Bytecode_ code) {
 
         case OP_CALLC:
         oprand1 = stack_[(*SP_)-1];
-        if (strcmp(code.oprand.str, "print") == 0) {
+        if (strcmp(inst.oprand.str, "print") == 0) {
             printf("%d", oprand1.iv);
             fflush(0);
         }
@@ -129,7 +127,7 @@ int main(int argc, char *argv[]) {
     const char asm_code[] = "loadc 1\n"
                             "loadc 2\n"
                             "add\n"
-                            "callc print";
+                            "call print";
 
     VM vm;
     vm.Compile(asm_code, strlen(asm_code));
