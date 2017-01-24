@@ -27,7 +27,10 @@ namespace boovm {
 
             void Push(Instruction code);
             unsigned *GetPC() {
-                return &idx_;
+                return &len_;
+            }
+            unsigned GetLength() {
+                return len_;
             }
 
             Instruction operator[](int idx) {
@@ -36,8 +39,8 @@ namespace boovm {
 
         private:
             Instruction *inst_;
+            unsigned cap_;
             unsigned len_;
-            unsigned idx_;
     };
 
     class Stack {
@@ -49,7 +52,7 @@ namespace boovm {
             Value Pop();
 
             unsigned *GetSP() {
-                return &idx_;
+                return &len_;
             }
             
             Value operator[](int idx) {
@@ -58,8 +61,8 @@ namespace boovm {
 
         private:
             Value *s_;
+            unsigned cap_;
             unsigned len_;
-            unsigned idx_;
     };
 
     class VM {
@@ -70,13 +73,17 @@ namespace boovm {
             void Compile(const char *asm_code, unsigned len);
             void Run();
 
+            Value GetResult() {
+                return stack_[*SP_-1];
+            }
+
         private:
             Bytecode bytecode_;
             Stack stack_;
             unsigned *SP_;
             unsigned PC_;
 
-            void execute(Instruction inst);
+            int execute(Instruction inst);
     };
 
 };

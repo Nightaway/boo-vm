@@ -8,30 +8,30 @@
 
 using namespace boovm;
 
-Bytecode::Bytecode() : inst_{nullptr}, len_{1000}, idx_{0}
+Bytecode::Bytecode() : inst_{nullptr}, cap_{1000}, len_{0}
 {
-    inst_ = new Instruction[len_];
+    inst_ = new Instruction[cap_];
 }
 Bytecode::~Bytecode() {
     delete [] inst_;
 }
 
 void Bytecode::Push(Instruction inst) {
-    inst_[idx_++] = inst;
+    inst_[len_++] = inst;
 }
 
-Stack::Stack() : s_{nullptr}, len_{10}, idx_{0} {
-    s_ = new Value[len_];
+Stack::Stack() : s_{nullptr}, cap_{10}, len_{0} {
+    s_ = new Value[cap_];
 }
 Stack::~Stack() {
     delete [] s_;
 }
 
 void Stack::Push(Value v) {
-    s_[idx_++] = v;
+    s_[len_++] = v;
 }
 Value Stack::Pop() {
-    return s_[idx_--];
+    return s_[len_--];
 }
 
 VM::VM() {
@@ -88,11 +88,14 @@ void VM::Compile(const char *asm_code, unsigned len) {
 void VM::Run() {
     for (;;) {
         Instruction inst = bytecode_[PC_++];
-        execute(inst);
+        int ret = execute(inst);
+        if (ret == 1) {
+            break;
+        }
     }
 }
 
-void VM::execute(Instruction inst) {
+int VM::execute(Instruction inst) {
     Value oprand1{nullptr, 0};
     Value oprand2{nullptr, 0};
     Value result{nullptr, 0};
@@ -118,19 +121,8 @@ void VM::execute(Instruction inst) {
         break;
 
         case OP_HALT:
-        while(1) {}
-        break;
+        return 1;
     }
-}
-
-int main(int argc, char *argv[]) {
-    const char asm_code[] = "loadc 1\n"
-                            "loadc 2\n"
-                            "add\n"
-                            "call print";
-
-    VM vm;
-    vm.Compile(asm_code, strlen(asm_code));
-    vm.Run();
     return 0;
 }
+
