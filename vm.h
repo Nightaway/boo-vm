@@ -6,7 +6,10 @@ namespace boovm {
     enum {
         OP_HALT = 0,
         OP_LOADC,
+        OP_LOAD,
+        OP_STORE,
         OP_ADD,
+        OP_MUL,
         OP_CALLC
     };
 
@@ -51,8 +54,8 @@ namespace boovm {
             void Push(Value v);
             Value Pop();
 
-            unsigned *GetSP() {
-                return &len_;
+            int *GetSP() {
+                return &SP_;
             }
             
             Value operator[](int idx) {
@@ -61,6 +64,22 @@ namespace boovm {
 
         private:
             Value *s_;
+            unsigned cap_;
+            unsigned len_;
+            int SP_;
+    };
+
+    class Memory {
+        public:
+            Memory();
+            ~Memory();
+
+            char *operator[](int idx) {
+                return mem_ + idx;
+            }
+
+        private:
+            char *mem_;
             unsigned cap_;
             unsigned len_;
     };
@@ -74,13 +93,14 @@ namespace boovm {
             void Run();
 
             Value GetResult() {
-                return stack_[*SP_-1];
+                return stack_[*SP_];
             }
 
         private:
             Bytecode bytecode_;
             Stack stack_;
-            unsigned *SP_;
+            Memory mem_;
+            int *SP_;
             unsigned PC_;
 
             int execute(Instruction inst);

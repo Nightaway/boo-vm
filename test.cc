@@ -12,10 +12,12 @@ struct TestList {
 
 int func_add1(const char *code, long size);
 int func_add2(const char *code, long size);
+int func_add3(const char *code, long size);
 
 TestList test_list[] = {
         {"add1.asm", func_add1},
-        {"add2.asm", func_add2}
+        {"add2.asm", func_add2},
+        {"load1.asm", func_add3}
 };
 
 static int len = sizeof(test_list)/sizeof(test_list[0]);
@@ -56,7 +58,17 @@ int func_add2(const char *code, long size) {
         boovm::VM vm;
         vm.Compile(code, size);
         vm.Run();
-        boovm::Value expect{nullptr, 10};
+        boovm::Value expect{nullptr, 70};
+        boovm::Value v = vm.GetResult();
+        Expect(v, expect);
+        return 0;
+}
+
+int func_add3(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
+        boovm::Value expect{nullptr, 11};
         boovm::Value v = vm.GetResult();
         Expect(v, expect);
         return 0;
