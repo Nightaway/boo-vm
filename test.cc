@@ -72,9 +72,9 @@ int func_add2(const char *code, long size) {
 int func_load1(const char *code, long size) {
         boovm::VM vm;
         boovm::Memory &mem = vm.GetMemory();
-        Value *v = (Value *)mem[0];
-        v->str = nullptr;
-        v->iv = 11;
+        boovm::Value *i = (boovm::Value *)mem[0];
+        i->str = nullptr;
+        i->iv = 11;
         vm.Compile(code, size);
         vm.Run();
         boovm::Value expect{nullptr, 11};
