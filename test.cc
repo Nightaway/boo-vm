@@ -4,6 +4,9 @@
 
 #include "vm.h"
 
+#define PRINT_PASS printf("===%s Num %d of %d PASS OK===\n",test_list[num-1].name, num, len);
+#define PRINT_FAIL printf("===%s Num %d of %d FAIL OK===\n",test_list[num-1].name, num, len);
+
 typedef int (*TestFunc)(const char *code, long size);
 struct TestList {
     const char *name;
@@ -26,20 +29,20 @@ static int num = 1;
 void Expect(boovm::Value v, boovm::Value expect) {
     if (v.str != nullptr&&expect.str != nullptr) {
         if (strcmp(v.str, expect.str)==0 && v.iv == expect.iv) {
-                printf("===Num %d of %d PASS OK===\n", num, len);
+                PRINT_PASS;
                 num++;
         } else {
-            printf("===Num %d of %d FAIL OK===\n", num, len);
+            PRINT_FAIL;
         }
     } else if (v.str == nullptr&&expect.str == nullptr) {
         if (v.iv == expect.iv) {
-                printf("===Num %d of %d PASS OK===\n", num, len);
+                PRINT_PASS;
                 num++;
         } else {
-            printf("===Num %d of %d FAIL OK===\n", num, len);
+            PRINT_FAIL;
         }
     } else {
-         printf("===Num %d of %d FAIL OK===\n", num, len);
+         PRINT_FAIL;
     }
 
 }
