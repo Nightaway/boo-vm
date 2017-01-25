@@ -71,27 +71,27 @@ void VM::Compile(const char *asm_code, unsigned len) {
             oprand.iv = atoi(str_oprand.c_str());
             Instruction inst{OP_LOADC, oprand};
             bytecode_.Push(inst);
-            op = "";
+            
         } else if (op == "load") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_LOAD, oprand};
             bytecode_.Push(inst);
-            op = "";
+           
         } else if (op == "store") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_STORE, oprand};
             bytecode_.Push(inst);
-            op = "";
+          
         } else if (op == "add") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_ADD, oprand};
             bytecode_.Push(inst);
-            op = "";
+            
         } else if (op == "mul") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_MUL, oprand};
             bytecode_.Push(inst);
-            op = "";
+          
         } else if (op == "call") {
             i += 1;
 
@@ -104,10 +104,11 @@ void VM::Compile(const char *asm_code, unsigned len) {
                 Instruction inst{OP_CALLC, oprand};
                 bytecode_.Push(inst);
             }
-            op = "";
+       
         } else if (op == "\n") {
-            op = "";
+   
         }
+        op = "";
     }
 
      Instruction inst{OP_HALT, 0};
