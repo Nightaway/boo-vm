@@ -166,7 +166,7 @@ int VM::execute(Instruction inst) {
         stack_.Push(result);
         break;
 
-        case OP_CALLC:
+        case OP_CALL:
         oprand1 = stack_[*SP_];
         if (strcmp(inst.oprand.str, "print") == 0) {
             printf("%d", oprand1.iv);

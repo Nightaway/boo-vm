@@ -10,7 +10,7 @@ namespace boovm {
         OP_STORE,
         OP_ADD,
         OP_MUL,
-        OP_CALLC
+        OP_CALL
     };
 
     struct Value {
