@@ -45,9 +45,6 @@ Memory::~Memory() {
 VM::VM() {
     PC_ = 0;
     SP_ = stack_.GetSP();
-    Value *v = (Value *)mem_[0];
-    v->str = nullptr;
-    v->iv = 11;
 }
 VM::~VM() {
     
