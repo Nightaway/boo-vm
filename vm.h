@@ -6,11 +6,14 @@ namespace boovm {
 
     enum {
         OP_EXIT = 0,
+        OP_POP,
         OP_LOADC,
         OP_LOAD,
         OP_STORE,
         OP_ADD,
         OP_MUL,
+        OP_JUMP,
+        OP_JUMPZ,
         OP_CALL
     };
 

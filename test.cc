@@ -17,12 +17,14 @@ int func_add1(const char *code, long size);
 int func_add2(const char *code, long size);
 int func_load1(const char *code, long size);
 int func_store1(const char *code, long size);
+int func_jump1(const char *code, long size);
 
 TestList test_list[] = {
         {"add1.asm", func_add1},
         {"add2.asm", func_add2},
         {"load1.asm", func_load1},
-        {"store1.asm", func_store1}
+        {"store1.asm", func_store1},
+        {"jump1.asm", func_jump1}
 };
 
 static int len = sizeof(test_list)/sizeof(test_list[0]);
@@ -91,6 +93,13 @@ int func_store1(const char *code, long size) {
         boovm::Value *v = (boovm::Value *)mem[0];
         boovm::Value expect{nullptr, 1};
         Expect(*v, expect);
+        return 0;
+}
+
+int func_jump1(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
         return 0;
 }
 

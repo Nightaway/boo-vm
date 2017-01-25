@@ -50,6 +50,17 @@ VM::~VM() {
     
 }
 
+Instruction makeInst1(const char *asm_code, unsigned &i, int len, char op) {
+    std::string str_oprand;
+    while (asm_code[i] != '\n'&&i<len) {
+        str_oprand += asm_code[i++];
+    }
+    Value oprand{nullptr, 0};
+    oprand.iv = atoi(str_oprand.c_str());
+    Instruction inst{op, oprand};
+    return inst;
+}
+
 void VM::Compile(const char *asm_code, unsigned len) {
     std::string op;
     for (unsigned i=0; i<len; ++i) {
@@ -60,15 +71,14 @@ void VM::Compile(const char *asm_code, unsigned len) {
         if (op == "loadc") {
             i += 1;
 
-            std::string str_oprand;
-            while (asm_code[i] != '\n'&&i<len) {
-                str_oprand += asm_code[i++];
-            }
-            Value oprand{nullptr, 0};
-            oprand.iv = atoi(str_oprand.c_str());
-            Instruction inst{OP_LOADC, oprand};
+            Instruction inst = makeInst1(asm_code, i, len, OP_LOADC);
             bytecode_.Push(inst);
             
+        } else if (op == "pop") {
+            Value oprand{nullptr, 0};
+            Instruction inst{OP_POP, oprand};
+            bytecode_.Push(inst);
+           
         } else if (op == "load") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_LOAD, oprand};
@@ -87,6 +97,18 @@ void VM::Compile(const char *asm_code, unsigned len) {
         } else if (op == "mul") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_MUL, oprand};
+            bytecode_.Push(inst);
+          
+        } else if (op == "jump") {
+            i += 1;
+
+            Instruction inst = makeInst1(asm_code, i, len, OP_JUMP);
+            bytecode_.Push(inst);
+          
+        } else if (op == "jumpz") {
+            i += 1;
+
+            Instruction inst = makeInst1(asm_code, i, len, OP_JUMPZ);
             bytecode_.Push(inst);
           
         } else if (op == "call") {
@@ -126,6 +148,11 @@ int VM::execute(Instruction inst) {
     Value *v{nullptr};
 
     switch (inst.op) {
+
+        case OP_POP:
+        (*SP_)--;
+        break;
+
         case OP_LOADC:
         stack_.Push(inst.oprand);
         break;
@@ -160,6 +187,17 @@ int VM::execute(Instruction inst) {
         result.iv = oprand1.iv * oprand2.iv;
         *SP_ -= 2;
         stack_.Push(result);
+        break;
+
+        case OP_JUMP:
+        PC_ = inst.oprand.iv;
+        break;
+
+        case OP_JUMPZ:
+        oprand1 = stack_[*SP_];
+        if (oprand1.iv == 0)
+            PC_ = inst.oprand.iv;
+        (*SP_)--;
         break;
 
         case OP_CALL:
