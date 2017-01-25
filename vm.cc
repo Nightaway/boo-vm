@@ -30,8 +30,8 @@ void Stack::Push(Value v) {
     s_[++SP_] = v;
     len_++;
 }
-Value Stack::Pop() {
-    return s_[len_--];
+void Stack::Pop() {
+    SP_--;
 }
 
 
@@ -111,16 +111,14 @@ void VM::Compile(const char *asm_code, unsigned len) {
         op = "";
     }
 
-     Instruction inst{OP_HALT, 0};
+     Instruction inst{OP_EXIT, 0};
      bytecode_.Push(inst);
 }
 void VM::Run() {
     for (;;) {
         Instruction inst = bytecode_[PC_++];
-        int ret = execute(inst);
-        if (ret == 1) {
+        if (execute(inst) == BOO_EXIT)
             break;
-        }
     }
 }
 
@@ -148,6 +146,7 @@ int VM::execute(Instruction inst) {
         v = (Value *)mem_[oprand2.iv];
         v->str = oprand1.str;
         v->iv = oprand1.iv;
+        (*SP_)--;
         break;
 
         case OP_ADD:
@@ -174,8 +173,8 @@ int VM::execute(Instruction inst) {
         }
         break;
 
-        case OP_HALT:
-        return 1;
+        case OP_EXIT:
+        return BOO_EXIT;
     }
     return 0;
 }

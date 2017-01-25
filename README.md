@@ -1,2 +1,2 @@
 # boo-vm
-a virtual machine for boo-lang
+a virtual machine for boolang

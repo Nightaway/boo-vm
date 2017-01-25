@@ -4,8 +4,8 @@
 
 #include "vm.h"
 
-#define PRINT_PASS printf("===%s Num %d of %d PASS OK===\n",test_list[num-1].name, num, len);
-#define PRINT_FAIL printf("===%s Num %d of %d FAIL OK===\n",test_list[num-1].name, num, len);
+#define PRINT_PASS printf("===%20s Num %d of %d PASS OK===\n",test_list[num-1].name, num, len);
+#define PRINT_FAIL printf("===%20s Num %d of %d FAIL OK===\n",test_list[num-1].name, num, len);
 
 typedef int (*TestFunc)(const char *code, long size);
 struct TestList {
@@ -15,12 +15,14 @@ struct TestList {
 
 int func_add1(const char *code, long size);
 int func_add2(const char *code, long size);
-int func_add3(const char *code, long size);
+int func_load1(const char *code, long size);
+int func_store1(const char *code, long size);
 
 TestList test_list[] = {
         {"add1.asm", func_add1},
         {"add2.asm", func_add2},
-        {"load1.asm", func_add3}
+        {"load1.asm", func_load1},
+        {"store1.asm", func_store1}
 };
 
 static int len = sizeof(test_list)/sizeof(test_list[0]);
@@ -67,13 +69,24 @@ int func_add2(const char *code, long size) {
         return 0;
 }
 
-int func_add3(const char *code, long size) {
+int func_load1(const char *code, long size) {
         boovm::VM vm;
         vm.Compile(code, size);
         vm.Run();
         boovm::Value expect{nullptr, 11};
         boovm::Value v = vm.GetResult();
         Expect(v, expect);
+        return 0;
+}
+
+int func_store1(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
+        boovm::Memory &mem = vm.GetMemory();
+        boovm::Value *v = (boovm::Value *)mem[0];
+        boovm::Value expect{nullptr, 1};
+        Expect(*v, expect);
         return 0;
 }
 

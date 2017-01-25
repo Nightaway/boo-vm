@@ -2,9 +2,10 @@
 #define __BOO_VM_H__
 
 namespace boovm {
+    #define BOO_EXIT 1
 
     enum {
-        OP_HALT = 0,
+        OP_EXIT = 0,
         OP_LOADC,
         OP_LOAD,
         OP_STORE,
@@ -52,7 +53,7 @@ namespace boovm {
             ~Stack();
 
             void Push(Value v);
-            Value Pop();
+            void Pop();
 
             int *GetSP() {
                 return &SP_;
@@ -94,6 +95,10 @@ namespace boovm {
 
             Value GetResult() {
                 return stack_[*SP_];
+            }
+
+            Memory &GetMemory() {
+                return mem_;
             }
 
         private:
