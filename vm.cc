@@ -101,7 +101,7 @@ void VM::Compile(const char *asm_code, unsigned len) {
             }
             if (str_oprand == "print") {
                 Value oprand{"print", 0};
-                Instruction inst{OP_CALLC, oprand};
+                Instruction inst{OP_CALL, oprand};
                 bytecode_.Push(inst);
             }
        
