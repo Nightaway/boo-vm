@@ -18,13 +18,21 @@ int func_add2(const char *code, long size);
 int func_load1(const char *code, long size);
 int func_store1(const char *code, long size);
 int func_jump1(const char *code, long size);
+int func_sub1(const char *code, long size);
+int func_less1(const char *code, long size);
+int func_equal1(const char *code, long size);
+int func_test1(const char *code, long size);
 
 TestList test_list[] = {
         {"add1.asm", func_add1},
         {"add2.asm", func_add2},
         {"load1.asm", func_load1},
         {"store1.asm", func_store1},
-        {"jump1.asm", func_jump1}
+        {"jump1.asm", func_jump1},
+        {"less1.asm", func_less1},
+        {"sub1.asm", func_sub1},
+        {"equal1.asm", func_equal1},
+        {"test1.asm", func_test1}
 };
 
 static int len = sizeof(test_list)/sizeof(test_list[0]);
@@ -37,6 +45,7 @@ void Expect(boovm::Value v, boovm::Value expect) {
                 num++;
         } else {
             PRINT_FAIL;
+            num++;
         }
     } else if (v.str == nullptr&&expect.str == nullptr) {
         if (v.iv == expect.iv) {
@@ -44,9 +53,11 @@ void Expect(boovm::Value v, boovm::Value expect) {
                 num++;
         } else {
             PRINT_FAIL;
+            num++;
         }
     } else {
          PRINT_FAIL;
+         num++;
     }
 
 }
@@ -100,6 +111,49 @@ int func_jump1(const char *code, long size) {
         boovm::VM vm;
         vm.Compile(code, size);
         vm.Run();
+        boovm::Value expect{nullptr, 0};
+        boovm::Value v = vm.GetResult();
+        Expect(v, expect);
+        return 0;
+}
+
+int func_less1(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
+        boovm::Value expect{nullptr, 0};
+        boovm::Value v = vm.GetResult();
+        Expect(v, expect);
+        return 0;
+}
+
+int func_sub1(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
+        boovm::Value expect{nullptr, -1};
+        boovm::Value v = vm.GetResult();
+        Expect(v, expect);
+        return 0;
+}
+
+int func_equal1(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
+        boovm::Value expect{nullptr, 0};
+        boovm::Value v = vm.GetResult();
+        Expect(v, expect);
+        return 0;
+}
+
+int func_test1(const char *code, long size) {
+        boovm::VM vm;
+        vm.Compile(code, size);
+        vm.Run();
+        boovm::Value expect{nullptr, 2};
+        boovm::Value v = vm.GetResult();
+        Expect(v, expect);
         return 0;
 }
 

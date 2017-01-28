@@ -11,7 +11,10 @@ namespace boovm {
         OP_LOAD,
         OP_STORE,
         OP_ADD,
+        OP_SUB,
         OP_MUL,
+        OP_LESS,
+        OP_EQUAL,
         OP_JUMP,
         OP_JUMPZ,
         OP_CALL

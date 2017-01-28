@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <map>
 #include <string>
 
 using namespace boovm;
@@ -19,7 +20,7 @@ void Bytecode::Push(Instruction inst) {
     inst_[len_++] = inst;
 }
 
-Stack::Stack() : s_{nullptr}, cap_{10}, len_{0}, SP_{-1} {
+Stack::Stack() : s_{nullptr}, cap_{100}, len_{0}, SP_{-1} {
     s_ = new Value[cap_];
 }
 Stack::~Stack() {
@@ -35,7 +36,7 @@ void Stack::Pop() {
 }
 
 
-Memory::Memory() : mem_{nullptr}, cap_{100}, len_{0} {
+Memory::Memory() : mem_{nullptr}, cap_{10000}, len_{0} {
     mem_ = new char[cap_];
 }
 Memory::~Memory() {
@@ -50,6 +51,8 @@ VM::~VM() {
     
 }
 
+std::map<std::string, int> labels;
+
 Instruction makeInst1(const char *asm_code, unsigned &i, int len, char op) {
     std::string str_oprand;
     while (asm_code[i] != '\n'&&i<len) {
@@ -61,12 +64,47 @@ Instruction makeInst1(const char *asm_code, unsigned &i, int len, char op) {
     return inst;
 }
 
+Instruction makeJump(const char *asm_code, unsigned &i, int len, char op) {
+    std::string str_oprand;
+    while (asm_code[i] != '\n'&&i<len) {
+        str_oprand += asm_code[i++];
+    }
+    Value oprand{nullptr, 0};
+    oprand.iv = labels[str_oprand];
+    Instruction inst{op, oprand};
+    return inst;
+}
+
+
 void VM::Compile(const char *asm_code, unsigned len) {
+    std::string label;
+    int lineno = 0;
+    for (unsigned i=0; i<len; ++i) {
+        while (asm_code[i] != ':' && asm_code[i] != '\n' && i<len) {
+            label += asm_code[i++];
+        }
+
+        if (asm_code[i] == ':') {
+            labels[label] = lineno;
+            //printf("%s %d\n", label.c_str(), lineno);
+        } else if (asm_code[i] == '\n') {
+            lineno++;
+        }
+        label = "";
+    }
+
     std::string op;
     for (unsigned i=0; i<len; ++i) {
-        while (asm_code[i] != ' ' && asm_code[i] != '\n' && i<len) {
+        while (asm_code[i] != ':' && asm_code[i] != ' ' && asm_code[i] != '\n' && i<len) {
             op += asm_code[i++];
         }
+
+       if (asm_code[i] == ':') {
+            ++i;
+            op = "";
+            continue;
+        }
+        //printf("%s\n", op.c_str());
             
         if (op == "loadc") {
             i += 1;
@@ -94,21 +132,36 @@ void VM::Compile(const char *asm_code, unsigned len) {
             Instruction inst{OP_ADD, oprand};
             bytecode_.Push(inst);
             
+        } else if (op == "sub") {
+            Value oprand{nullptr, 0};
+            Instruction inst{OP_SUB, oprand};
+            bytecode_.Push(inst);
+            
         } else if (op == "mul") {
             Value oprand{nullptr, 0};
             Instruction inst{OP_MUL, oprand};
             bytecode_.Push(inst);
           
+        } else if (op == "less") {
+            Value oprand{nullptr, 0};
+            Instruction inst{OP_LESS, oprand};
+            bytecode_.Push(inst);
+          
+        } else if (op == "equal") {
+            Value oprand{nullptr, 0};
+            Instruction inst{OP_EQUAL, oprand};
+            bytecode_.Push(inst);
+          
         } else if (op == "jump") {
             i += 1;
 
-            Instruction inst = makeInst1(asm_code, i, len, OP_JUMP);
+            Instruction inst = makeJump(asm_code, i, len, OP_JUMP);
             bytecode_.Push(inst);
           
         } else if (op == "jumpz") {
             i += 1;
 
-            Instruction inst = makeInst1(asm_code, i, len, OP_JUMPZ);
+            Instruction inst = makeJump(asm_code, i, len, OP_JUMPZ);
             bytecode_.Push(inst);
           
         } else if (op == "call") {
@@ -181,10 +234,34 @@ int VM::execute(Instruction inst) {
         stack_.Push(result);
         break;
 
+        case OP_SUB:
+        oprand1 = stack_[(*SP_)-1];
+        oprand2 = stack_[*SP_];
+        result.iv = oprand1.iv - oprand2.iv;
+        *SP_ -= 2;
+        stack_.Push(result);
+        break;
+
         case OP_MUL:
         oprand1 = stack_[*SP_];
         oprand2 = stack_[(*SP_)-1];
         result.iv = oprand1.iv * oprand2.iv;
+        *SP_ -= 2;
+        stack_.Push(result);
+        break;
+
+        case OP_LESS:
+        oprand1 = stack_[(*SP_)-1];
+        oprand2 = stack_[*SP_];
+        result.iv = oprand1.iv < oprand2.iv;
+        *SP_ -= 2;
+        stack_.Push(result);
+        break;
+
+        case OP_EQUAL:
+        oprand1 = stack_[*SP_];
+        oprand2 = stack_[(*SP_)-1];
+        result.iv = oprand1.iv == oprand2.iv;
         *SP_ -= 2;
         stack_.Push(result);
         break;
