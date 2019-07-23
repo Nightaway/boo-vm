@@ -1,5 +1,5 @@
 # boo-vm
-a virtual machine for boolang
+a virtual machine for tinylang
 
 ## How to compile:
 ```
